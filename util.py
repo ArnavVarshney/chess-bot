@@ -17,7 +17,7 @@ APP_VERSION = 'v1'
 BOX_TITLE = f'{APP_NAME} {APP_VERSION}'
 
 platform = sys.platform
-sys_os = sys_plat.system()
+sys_os = 'linux' if platform.startswith('linux') else 'darwin' if platform.startswith('darwin') else 'win32'
 
 ico_path = {
     'win32': {'pecg': 'Icon/pecg.ico', 'enemy': 'Icon/enemy.ico', 'adviser': 'Icon/adviser.ico'},
