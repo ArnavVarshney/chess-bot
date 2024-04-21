@@ -5,33 +5,22 @@ import sys
 import chess.polyglot
 
 log_format = '%(asctime)s :: %(funcName)s :: line: %(lineno)d :: %(levelname)s :: %(message)s'
-logging.basicConfig(
-    filename='pecg_log.txt',
-    filemode='w',
-    level=logging.DEBUG,
-    format=log_format
-)
+logging.basicConfig(filename='pecg_log.txt', filemode='w', level=logging.DEBUG, format=log_format)
 
 APP_NAME = 'ELEC3442 - Chess Robot'
-APP_VERSION = 'v1'
+APP_VERSION = 'v1.2'
 BOX_TITLE = f'{APP_NAME} {APP_VERSION}'
 
 platform = sys.platform
 sys_os = 'linux' if platform.startswith('linux') else 'darwin' if platform.startswith('darwin') else 'win32'
 
-ico_path = {
-    'win32': {'pecg': 'Icon/pecg.ico', 'enemy': 'Icon/enemy.ico', 'adviser': 'Icon/adviser.ico'},
-    'linux': {'pecg': 'Icon/pecg.png', 'enemy': 'Icon/enemy.png', 'adviser': 'Icon/adviser.png'},
-    'darwin': {'pecg': 'Icon/pecg.png', 'enemy': 'Icon/enemy.png', 'adviser': 'Icon/adviser.png'}
-}
+ico_path = {'win32': {'pecg': 'Icon/pecg.ico', 'enemy': 'Icon/enemy.ico'},
+            'linux': {'pecg': 'Icon/pecg.png', 'enemy': 'Icon/enemy.png'},
+            'darwin': {'pecg': 'Icon/pecg.png', 'enemy': 'Icon/enemy.png'}}
 
 MIN_DEPTH = 1
 MAX_DEPTH = 1000
-MANAGED_UCI_OPTIONS = ['ponder', 'uci_chess960', 'multipv', 'uci_analysemode', 'ownbook']
-GUI_THEME = [
-    'Green', 'GreenTan', 'LightGreen', 'BluePurple', 'Purple', 'BlueMono', 'GreenMono', 'BrownBlue',
-    'BrightColors', 'NeutralBlue', 'Kayak', 'SandyBeach', 'TealMono', 'Topanga', 'Dark', 'Black', 'DarkAmber'
-]
+GUI_THEME = ['Dark', 'Reddit', 'Black']
 
 IMAGE_PATH = 'Images/60'  # path to the chess pieces
 
@@ -60,13 +49,8 @@ RANK_3 = 2
 RANK_2 = 1
 RANK_1 = 0
 
-initial_board = [[ROOKB, KNIGHTB, BISHOPB, QUEENB, KINGB, BISHOPB, KNIGHTB, ROOKB],
-                 [PAWNB, ] * 8,
-                 [BLANK, ] * 8,
-                 [BLANK, ] * 8,
-                 [BLANK, ] * 8,
-                 [BLANK, ] * 8,
-                 [PAWNW, ] * 8,
+initial_board = [[ROOKB, KNIGHTB, BISHOPB, QUEENB, KINGB, BISHOPB, KNIGHTB, ROOKB], [PAWNB, ] * 8, [BLANK, ] * 8,
+                 [BLANK, ] * 8, [BLANK, ] * 8, [BLANK, ] * 8, [PAWNW, ] * 8,
                  [ROOKW, KNIGHTW, BISHOPW, QUEENW, KINGW, BISHOPW, KNIGHTW, ROOKW]]
 
 white_init_promote_board = [[QUEENW, ROOKW, BISHOPW, KNIGHTW]]
@@ -148,55 +132,32 @@ queenW = os.path.join(IMAGE_PATH, 'wQ.png')
 kingB = os.path.join(IMAGE_PATH, 'bK.png')
 kingW = os.path.join(IMAGE_PATH, 'wK.png')
 
-images = {
-    BISHOPB: bishopB, BISHOPW: bishopW, PAWNB: pawnB, PAWNW: pawnW,
-    KNIGHTB: knightB, KNIGHTW: knightW, ROOKB: rookB, ROOKW: rookW,
-    KINGB: kingB, KINGW: kingW, QUEENB: queenB, QUEENW: queenW, BLANK: blank
-}
+images = {BISHOPB: bishopB, BISHOPW: bishopW, PAWNB: pawnB, PAWNW: pawnW, KNIGHTB: knightB, KNIGHTW: knightW,
+          ROOKB: rookB, ROOKW: rookW, KINGB: kingB, KINGW: kingW, QUEENB: queenB, QUEENW: queenW, BLANK: blank}
 
 # Promote piece from psg (pysimplegui) to pyc (python-chess)
-promote_psg_to_pyc = {
-    KNIGHTB: chess.KNIGHT, BISHOPB: chess.BISHOP,
-    ROOKB: chess.ROOK, QUEENB: chess.QUEEN,
-    KNIGHTW: chess.KNIGHT, BISHOPW: chess.BISHOP,
-    ROOKW: chess.ROOK, QUEENW: chess.QUEEN
-}
+promote_psg_to_pyc = {KNIGHTB: chess.KNIGHT, BISHOPB: chess.BISHOP, ROOKB: chess.ROOK, QUEENB: chess.QUEEN,
+                      KNIGHTW: chess.KNIGHT, BISHOPW: chess.BISHOP, ROOKW: chess.ROOK, QUEENW: chess.QUEEN}
 
-INIT_PGN_TAG = {
-    'Event': 'Human vs computer',
-    'White': 'Human',
-    'Black': 'Computer'
-}
+INIT_PGN_TAG = {'Event': 'Human vs Robot', 'White': 'Human', 'Black': 'Computer'}
 
 # (1) Mode: Neutral
-menu_def_neutral = [
-    ['&Mode', ['Play']],
-    ['Boar&d', ['Flip', 'Color', ['Brown::board_color_k',
-                                  'Blue::board_color_k',
-                                  'Green::board_color_k',
-                                  'Gray::board_color_k'],
-                'Theme', GUI_THEME]],
-    ['&Engine', ['Set Engine Adviser', 'Set Engine Opponent', 'Set Depth',
-                 'Manage', ['Install', 'Edit', 'Delete']]],
-    ['&Time', ['User::tc_k', 'Engine::tc_k']],
-    ['&Book', ['Set Book::book_set_k']],
-    ['&User', ['Set Name::user_name_k']],
-    ['Tools', ['PGN', ['Delete Player::delete_player_k']]],
-    ['&Settings', ['Game::settings_game_k']],
-    ['&Help', ['GUI']],
-]
+menu_def_neutral = [['&Mode', ['Play']], ['Boar&d', ['Flip', 'Color', ['Brown::board_color_k', 'Blue::board_color_k',
+                                                                       'Green::board_color_k', 'Gray::board_color_k'],
+                                                     'Theme', GUI_THEME]],
+                    ['&Engine', ['Set Engine ELO']],
+                    ['&Time', ['User::tc_k', 'Engine::tc_k']],
+                    ['&User', ['Set Name::user_name_k']],
+                    ['&Camera', ['Open Camera']],
+                    ['&Help', ['GUI']], ]
 
 # (2) Mode: Play, info: hide
-menu_def_play = [
-    ['&Mode', ['Neutral']],
-    ['&Game', ['&New::new_game_k',
-               'Save to My Games::save_game_k',
-               'Save to White Repertoire',
-               'Save to Black Repertoire',
-               'Resign::resign_game_k',
-               'User Wins::user_wins_k',
-               'User Draws::user_draws_k']],
-    ['FEN', ['Paste']],
-    ['&Engine', ['Go', 'Move Now']],
-    ['&Help', ['GUI']],
-]
+menu_def_play = [['&Mode', ['Neutral']], ['&Game', ['&New::new_game_k',  # 'Save to My Games::save_game_k',
+                                                    # 'Save to White Repertoire',
+                                                    # 'Save to Black Repertoire',
+                                                    # 'Resign::resign_game_k',
+                                                    # 'User Wins::user_wins_k',
+                                                    # 'User Draws::user_draws_k'
+                                                    ]],  # ['FEN', ['Paste']],
+                 # ['&Engine', ['Go', 'Move Now']],
+                 ['&Help', ['GUI']], ]
