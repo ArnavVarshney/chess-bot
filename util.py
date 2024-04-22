@@ -2,8 +2,6 @@ import logging
 import os
 import sys
 
-import chess.polyglot
-
 log_format = '%(asctime)s :: %(funcName)s :: line: %(lineno)d :: %(levelname)s :: %(message)s'
 logging.basicConfig(filename='pecg_log.txt', filemode='w', level=logging.DEBUG, format=log_format)
 
@@ -52,10 +50,6 @@ RANK_1 = 0
 initial_board = [[ROOKB, KNIGHTB, BISHOPB, QUEENB, KINGB, BISHOPB, KNIGHTB, ROOKB], [PAWNB, ] * 8, [BLANK, ] * 8,
                  [BLANK, ] * 8, [BLANK, ] * 8, [BLANK, ] * 8, [PAWNW, ] * 8,
                  [ROOKW, KNIGHTW, BISHOPW, QUEENW, KINGW, BISHOPW, KNIGHTW, ROOKW]]
-
-white_init_promote_board = [[QUEENW, ROOKW, BISHOPW, KNIGHTW]]
-
-black_init_promote_board = [[QUEENB, ROOKB, BISHOPB, KNIGHTB]]
 
 HELP_MSG = """The GUI has 2 modes, Play and Neutral. After startup
 you are in Neutral mode. You can go to mode Play through Mode menu.
@@ -135,16 +129,13 @@ kingW = os.path.join(IMAGE_PATH, 'wK.png')
 images = {BISHOPB: bishopB, BISHOPW: bishopW, PAWNB: pawnB, PAWNW: pawnW, KNIGHTB: knightB, KNIGHTW: knightW,
           ROOKB: rookB, ROOKW: rookW, KINGB: kingB, KINGW: kingW, QUEENB: queenB, QUEENW: queenW, BLANK: blank}
 
-# Promote piece from psg (pysimplegui) to pyc (python-chess)
-promote_psg_to_pyc = {KNIGHTB: chess.KNIGHT, BISHOPB: chess.BISHOP, ROOKB: chess.ROOK, QUEENB: chess.QUEEN,
-                      KNIGHTW: chess.KNIGHT, BISHOPW: chess.BISHOP, ROOKW: chess.ROOK, QUEENW: chess.QUEEN}
-
 INIT_PGN_TAG = {'Event': 'Human vs Robot', 'White': 'Human', 'Black': 'Computer'}
 
+MODE_PLAY = 'Mode            Play'
+MODE_NEUTRAL = 'Mode            Neutral'
+
 # (1) Mode: Neutral
-menu_def_neutral = [['&Mode', ['Play']], ['Boar&d', ['Flip', 'Color', ['Brown::board_color_k', 'Blue::board_color_k',
-                                                                       'Green::board_color_k', 'Gray::board_color_k'],
-                                                     'Theme', GUI_THEME]],
+menu_def_neutral = [['&Mode', ['Play']], ['Boar&d', ['Flip', 'Theme', GUI_THEME]],
                     ['&Engine', ['Set Engine ELO']],
                     ['&Time', ['User::tc_k', 'Engine::tc_k']],
                     ['&User', ['Set Name::user_name_k']],
@@ -152,12 +143,8 @@ menu_def_neutral = [['&Mode', ['Play']], ['Boar&d', ['Flip', 'Color', ['Brown::b
                     ['&Help', ['GUI']], ]
 
 # (2) Mode: Play, info: hide
-menu_def_play = [['&Mode', ['Neutral']], ['&Game', ['&New::new_game_k',  # 'Save to My Games::save_game_k',
-                                                    # 'Save to White Repertoire',
-                                                    # 'Save to Black Repertoire',
-                                                    # 'Resign::resign_game_k',
-                                                    # 'User Wins::user_wins_k',
-                                                    # 'User Draws::user_draws_k'
-                                                    ]],  # ['FEN', ['Paste']],
-                 # ['&Engine', ['Go', 'Move Now']],
-                 ['&Help', ['GUI']], ]
+menu_def_play = [
+    ['&Mode', ['Neutral']],
+    ['&Game', ['&New::new_game_k', 'Resign::resign_game_k', 'User Wins::user_wins_k', 'User Draws::user_draws_k']],
+    ['&Help', ['GUI']],
+]
