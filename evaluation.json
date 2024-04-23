@@ -1,0 +1,38 @@
+[
+  {
+    "id": "black",
+    "move_count": 0,
+    "best_move": "e7e5",
+    "wdl": [
+      59,
+      923,
+      18
+    ],
+    "time_left": 309500,
+    "cp": -7
+  },
+  {
+    "id": "white",
+    "move_count": 1,
+    "best_move": "e2e4",
+    "wdl": [
+      135,
+      858,
+      7
+    ],
+    "time_left": 309400,
+    "cp": 31
+  },
+  {
+    "id": "black",
+    "move_count": 2,
+    "best_move": "a5b4",
+    "wdl": [
+      882,
+      118,
+      0
+    ],
+    "time_left": 318800,
+    "cp": -156
+  }
+]

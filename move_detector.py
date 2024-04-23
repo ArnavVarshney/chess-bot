@@ -12,6 +12,16 @@ class MoveDetector:
     directory = "output/move_detector"
     prevPos = None
     currentPos = None
+    translation = {
+        "A": "H",
+        "H": "A",
+        "B": "G",
+        "G": "B",
+        "C": "F",
+        "F": "C",
+        "D": "E",
+        "E": "D"
+    }
 
     def __init__(self, cam=0):
         self.cap = cv.VideoCapture(cam)
@@ -193,7 +203,7 @@ class MoveDetector:
             sum = self.tileSum(boxes[box], img)
             values.append((sum, box))
         values.sort(reverse=True)
-        return values[0][1], values[1][1]
+        return self.translation[values[0][1][0]] + values[0][1][1], self.translation[values[1][1][0]] + values[1][1][1]
 
     def detectPiece(self):
         newImg = cv.absdiff(self.currentPos, self.prevPos)
@@ -203,7 +213,7 @@ class MoveDetector:
 def main():
     detector = MoveDetector()
     print("sleeping")
-    sleep(50)
+    sleep(15)
     detector.takePicture()
     print("done")
     print("sleeping")
@@ -213,5 +223,4 @@ def main():
     print(detector.detectPiece())
     return
 
-
-main()
+# main()
