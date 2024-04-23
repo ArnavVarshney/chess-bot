@@ -86,7 +86,7 @@ class EasyChessGui:
           time_left: time left
         """
         # Save user comment
-        self.stockfish.make_moves_from_current_position(''.join(user_move))
+        self.stockfish.make_moves_from_current_position([''.join(user_move)])
         evalU = self.stockfish.get_evaluation()
         wdl = self.stockfish.get_wdl_stats()
         best_move = self.stockfish.get_best_move()
@@ -315,7 +315,7 @@ class EasyChessGui:
 
             # Update game, move from human
             time_left = timer.base
-            self.update_game(move_cnt, user_move, time_left)
+            self.update_game(move_cnt, move_from + move_to, time_left)
 
             if move_cnt % 2 == 0:
                 window.find_element("_movelist_").Update(f"{(move_cnt + 1) // 2 + 1}. ", append=True)
