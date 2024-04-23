@@ -23,8 +23,10 @@ class MoveDetector:
         "E": "D"
     }
 
-    def __init__(self, cam=0):
+    def __init__(self, cam=-1):
         self.cap = cv.VideoCapture(cam)
+        self.cap.set(3, 1920)
+        self.cap.set(4, 1080)
         if not os.path.isdir(self.directory):
             os.makedirs(self.directory)
         self.boxes = self.calibrate()
@@ -32,14 +34,14 @@ class MoveDetector:
 
     def calibrate(self):
         print(
-            "Calibrating camera, please put above an empty chessboard and don't move it afterwards.\n Hold for 10 seconds")
+            "Calibrating camera, please put above an empty chessboard and don't move it afterwards.\n Hold for 5 seconds")
         print("------------------------------------------------------------------------------------------")
-        sleep(10)
+        sleep(5)
         # Calibrating
         boxes = {}
         _, frame = self.cap.read()
-        img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        img = cv.medianBlur(img, 5)
+        #img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        img = cv.medianBlur(frame, 5)
         ret, th1 = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
         krn = cv.getStructuringElement(cv.MORPH_RECT, (50, 30))
         dlt = cv.dilate(th1, krn, iterations=5)
@@ -203,7 +205,7 @@ class MoveDetector:
             sum = self.tileSum(boxes[box], img)
             values.append((sum, box))
         values.sort(reverse=True)
-        return self.translation[values[0][1][0]] + values[0][1][1], self.translation[values[1][1][0]] + values[1][1][1]
+        return values[0][1][0].lower() + values[0][1][1], values[1][1][0].lower() + values[1][1][1]
 
     def detectPiece(self):
         newImg = cv.absdiff(self.currentPos, self.prevPos)

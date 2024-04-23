@@ -50,6 +50,7 @@ class EasyChessGui:
         self.stockfish = Stockfish(path=self.stockfish_path)
 
     def get_move_from_to(self, user_move, move_cnt):
+        print(user_move)
         p1 = user_move[0]
         p2 = user_move[1]
 
@@ -85,7 +86,7 @@ class EasyChessGui:
           time_left: time left
         """
         # Save user comment
-        self.stockfish.make_moves_from_current_position([user_move])
+        self.stockfish.make_moves_from_current_position(''.join(user_move))
         evalU = self.stockfish.get_evaluation()
         wdl = self.stockfish.get_wdl_stats()
         best_move = self.stockfish.get_best_move()
