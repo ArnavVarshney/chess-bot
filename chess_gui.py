@@ -1,17 +1,6 @@
+from classes import Timer
+from move_detector import MoveDetector
 from util import *
-
-
-def get_move_from_to(move_cnt):
-    moves = [("a2", "a4"), ("a7", "a5"), ("b2", "b4"), ("b7", "b5"), ("c2", "c4"), ("c7", "c5"), ("d2", "d4"),
-             ("d7", "d5"), ("e2", "e4"), ("e7", "e5"), ("f2", "f4"), ("f7", "f5"), ("g2", "g4"), ("g7", "g5"),
-             ("h2", "h4"), ("h7", "h5"), ("a1", "a3"), ("a8", "a6"), ("b1", "b3"), ("b8", "b6"), ("c1", "c3"),
-             ("c8", "c6"), ("d1", "d3"), ("d8", "d6"), ("e1", "e3"), ("e8", "e6"), ("f1", "f3"), ("f8", "f6"),
-             ("g1", "g3"), ("g8", "g6"), ("h1", "h3"), ("h8", "h6"), ("a3", "a2"), ("a6", "a7"), ("b3", "b2"),
-             ("b6", "b7"), ("c3", "c2"), ("c6", "c7"), ("d3", "d2"), ("d6", "d7"), ("e3", "e2"), ("e6", "e7"),
-             ("f3", "f2"), ("f6", "f7"), ("g3", "g2"), ("g6", "g7"), ("h3", "h2"), ("h6", "h7"), ("a2", "a1"),
-             ("a7", "a8"), ("b2", "b1"), ("b7", "b8"), ("c2", "c1"), ("c7", "c8"), ("d2", "d1"), ("d7", "d8"),
-             ("e2", "e1"), ("e7", "e8"), ("f2", "f1"), ("f7", "f8"), ("g2", "g1"), ("g7", "g8"), ("h2", "h1")]
-    return moves[move_cnt]
 
 
 class EasyChessGui:
@@ -48,6 +37,7 @@ class EasyChessGui:
         self.move_sq_dark_color = "#B8AF4E"
 
         self.gui_theme = theme
+        self.bella = MoveDetector()
 
         # platform specific stockfish path
         if sys_os == "Windows":
@@ -58,6 +48,33 @@ class EasyChessGui:
             self.stockfish_path = "/opt/homebrew/bin/stockfish"
 
         self.stockfish = Stockfish(path=self.stockfish_path)
+
+    def get_move_from_to(self, user_move, move_cnt):
+        p1 = user_move[0]
+        p2 = user_move[1]
+
+        if move_cnt % 2 == 0:
+            correct = 'white'
+        else:
+            correct = 'black'
+
+        p1_col = "abcdefgh".index(p1[0])
+        p1_row = 8 - int(p1[1])
+        piece1 = self.psg_board[p1_row][p1_col]
+
+        p2_col = "abcdefgh".index(p2[0])
+        p2_row = 8 - int(p2[1])
+        piece2 = self.psg_board[p2_row][p2_col]
+
+        if piece1 == 0:
+            return p2, p1
+        elif piece2 == 0:
+            return p1, p2
+        else:
+            if piece1 <= 6 and correct == 'white':
+                return p2, p1
+            else:
+                return p1, p2
 
     def update_game(self, mc: int, user_move: str, time_left: int):
         """Saves moves in the game.
@@ -270,8 +287,9 @@ class EasyChessGui:
                 timer.elapse += 100
 
                 if button == "_moved_":
-                    move_from, move_to = get_move_from_to(move_cnt)
-                    user_move = move_from + move_to
+                    self.bella.takePicture()
+                    user_move = self.bella.detectPiece()
+                    move_from, move_to = self.get_move_from_to(user_move, move_cnt)
                     print(f"move_from: {move_from}, move_to: {move_to}")
                     save_to_json_file("evaluation.json", evaluation_dictionary)
                     if move_from is not None and move_to is not None and move_from != move_to:
@@ -405,11 +423,7 @@ class EasyChessGui:
         # White board layout, mode: Neutral
         other_column_layout = [[sg.Text("Move list", size=(None, 1), font=("Segoe UI", 10), expand_x=True)], [
             sg.Multiline("", do_not_clear=True, autoscroll=True, size=(52, 30), font=("Segoe UI", 10), key="_movelist_",
-                         rstrip=False, disabled=True, )],
-                               # [sg.Text("Comment", size=(None, 1), font=("Segoe UI", 10), expand_x=True)], [
-                               #     sg.Multiline("", do_not_clear=True, autoscroll=True, size=(52, 12),
-                               #                  font=("Segoe UI", 10), key="comment_k", )],
-                               ]
+                         rstrip=False, disabled=True, )], ]
 
         column_layout = [[self.menu_elem], [sg.Column(black_controls, expand_x=True)], [sg.Column(board_tab)],
                          [sg.Column(white_controls, expand_x=True)], [sg.Column(board_controls)], ]
@@ -574,6 +588,8 @@ class EasyChessGui:
                 self.menu_elem.Update(menu_def_play)
                 self.psg_board = copy.deepcopy(initial_board)
                 board = chess.Board()
+
+                self.bella.takePicture()
 
                 while True:
                     button, value = window.Read(timeout=100)
