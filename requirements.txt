@@ -1,0 +1,8 @@
+dash~=2.16.1
+pandas~=2.2.2
+PySimpleGUI~=5.0.4
+chess~=1.10.0
+stockfish~=3.28.0
+opencv-python~=4.9.0.80
+matplotlib~=3.8.4
+numpy~=1.26.4
