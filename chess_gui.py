@@ -7,6 +7,7 @@ import PySimpleGUI as sg
 import chess
 import chess.engine
 import chess.pgn
+import cv2
 from stockfish import Stockfish
 
 from classes import Timer
@@ -417,7 +418,7 @@ class EasyChessGui:
                         right_click_menu=["Right", ["Show::right_search_info_k", "Hide::right_search_info_k"], ],
                         visible=False, )], [
                 sg.Text("", key="search_info_all_k", size=(55, 1), font=("Segoe UI", 10), relief="sunken",
-                        visible=False, )], [sg.Button("Moved", size=(5, 1), key="_moved_", ), ], ]
+                        visible=False, )], [sg.Button("Moved", size=(5, 1), key="_moved_", visible=False)], ]
 
         white_controls = [[sg.Text("Human", font=("Segoe UI", 12, "bold"), key="_White_", size=(24, 1), ), sg.Push(),
                            sg.Text("", font=("Segoe UI", 12), key="w_base_time_k", size=(11, 1), relief='sunken'),
@@ -593,12 +594,26 @@ class EasyChessGui:
                 window = self.create_new_window(window, True)
                 continue
 
+            if button == 'Open Camera':
+                layout = [[sg.Image(filename='', key='image')]]
+                window_camera = sg.Window('Camera Viewfinder', layout, size=(640, 480))
+                cap = cv2.VideoCapture(0)
+                while True:
+                    event_camera, values_camera = window_camera.read(timeout=1)
+                    if event_camera == sg.WINDOW_CLOSED:
+                        break
+                    ret, frame = cap.read()
+                    imgbytes = cv2.imencode('.png', frame)[1].tobytes()
+                    window_camera['image'].update(data=imgbytes)
+                window_camera.close()
+                cap.release()
+
             # Mode: Neutral
             if button == "Play":
                 # Change menu from Neutral to Play
                 try:
                     sg.PopupOK("Calibrating camera, please put above an empty chessboard and don't move it "
-                               "afterwards.")
+                               "afterwards.", title=BOX_TITLE)
 
                     self.bella = MoveDetector()
                     self.menu_elem.update(menu_def_play)
@@ -613,6 +628,7 @@ class EasyChessGui:
                         window.find_element("_gamestatus_").update("Mode     Play")
                         window.find_element("_movelist_").update(disabled=False)
                         window.find_element("_movelist_").update("", disabled=True)
+                        window.find_element("_moved_").update(visible=True)
 
                         self.play_game(window, board)
                         window.find_element("_gamestatus_").update("Mode     Neutral")

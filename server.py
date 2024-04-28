@@ -43,7 +43,7 @@ def init_server(host="0.0.0.0", port=8080):
         try:
             with open("evaluation.json", "r") as f:
                 data = json.load(f)
-                print(data)
+                # print(data)
 
             df = pd.DataFrame(data)
 

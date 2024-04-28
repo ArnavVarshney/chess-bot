@@ -86,7 +86,7 @@ images = {BISHOPB: bishopB, BISHOPW: bishopW, PAWNB: pawnB, PAWNW: pawnW, KNIGHT
 menu_def_neutral = [["&Mode", ["Play"]], ["Boar&d", ["Flip", "Color", ["Brown::board_color_k", "Blue::board_color_k",
                                                                        "Green::board_color_k", "Gray::board_color_k", ],
                                                      "Theme", GUI_THEME, ], ], ["&Time", ["User::tc_k"]],
-                    ["&User", ["Set Name::user_name_k"]]]
+                    ["&User", ["Set Name::user_name_k"]], ['&Camera', ['Open Camera']]]
 
 # (2) Mode: Play, info: hide
 menu_def_play = [["&Mode", ["Neutral"]]]
