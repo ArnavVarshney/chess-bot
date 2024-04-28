@@ -20,6 +20,7 @@ class EasyChessGui:
     is_p1_white = True  # White is at the bottom in board layout
 
     def __init__(self, theme):
+        self.game = None
         self.theme = theme
 
         self.init_game()
@@ -51,7 +52,8 @@ class EasyChessGui:
         self.move_sq_dark_color = "#B8AF4E"
 
         self.gui_theme = theme
-        self.bella = MoveDetector()
+        # self.bella = MoveDetector()
+        self.bella = None
 
         # platform specific stockfish path
         if sys_os == "Windows":
@@ -164,22 +166,22 @@ class EasyChessGui:
 
     def clear_elements(self, window):
         """Clear movelist, score, pv, time, depth and nps boxes"""
-        window.find_element("_movelist_").Update(disabled=False)
-        window.find_element("_movelist_").Update("", disabled=True)
-        window.Element("w_base_time_k").Update("")
-        window.Element("b_base_time_k").Update("")
-        window.Element("w_elapse_k").Update("")
-        window.Element("b_elapse_k").Update("")
+        window.find_element("_movelist_").update(disabled=False)
+        window.find_element("_movelist_").update("", disabled=True)
+        window.Element("w_base_time_k").update("")
+        window.Element("b_base_time_k").update("")
+        window.Element("w_elapse_k").update("")
+        window.Element("b_elapse_k").update("")
 
     def update_labels_and_game_tags(self, window, human="Human"):
         """Update player names"""
         engine_id = self.opp_id_name
         if self.is_p1_white:
-            window.find_element("_White_").Update(human)
-            window.find_element("_Black_").Update(engine_id)
+            window.find_element("_White_").update(human)
+            window.find_element("_Black_").update(engine_id)
         else:
-            window.find_element("_White_").Update(engine_id)
-            window.find_element("_Black_").Update(human)
+            window.find_element("_White_").update(engine_id)
+            window.find_element("_Black_").update(human)
 
     def change_square_color(self, window, row, col):
         """
@@ -188,7 +190,7 @@ class EasyChessGui:
         btn_sq = window.find_element(key=(row, col))
         is_dark_square = True if (row + col) % 2 else False
         bd_sq_color = (self.move_sq_dark_color if is_dark_square else self.move_sq_light_color)
-        btn_sq.Update(button_color=("white", bd_sq_color))
+        btn_sq.update(button_color=("white", bd_sq_color))
 
     def relative_row(self, s, stm):
         """
@@ -230,7 +232,7 @@ class EasyChessGui:
                 color = self.sq_dark_color if (i + j) % 2 else self.sq_light_color
                 piece_image = images[self.psg_board[i][j]]
                 elem = window.find_element(key=(i, j))
-                elem.Update(button_color=("white", color), image_filename=piece_image, )
+                elem.update(button_color=("white", color), image_filename=piece_image, )
 
     def render_square(self, image, key, location, label=None):
         """Returns an RButton (Read Button) with image image"""
@@ -248,8 +250,8 @@ class EasyChessGui:
         timer = Timer(self.human_tc_type, self.human_base_time_ms, self.human_inc_time_ms, self.human_period_moves, )
 
         elapse_str = self.get_time_h_mm_ss(timer.base)
-        window.Element("w_base_time_k").Update(elapse_str)
-        window.Element("b_base_time_k").Update(elapse_str)
+        window.Element("w_base_time_k").update(elapse_str)
+        window.Element("b_base_time_k").update(elapse_str)
 
         return timer
 
@@ -260,8 +262,8 @@ class EasyChessGui:
           window: A PySimplegUI window.
           board: current board position
         """
-        window.find_element("_movelist_").Update(disabled=False)
-        window.find_element("_movelist_").Update("", disabled=True)
+        window.find_element("_movelist_").update(disabled=False)
+        window.find_element("_movelist_").update("", disabled=True)
 
         move_cnt = 0
 
@@ -292,7 +294,7 @@ class EasyChessGui:
 
                 # Update elapse box in m:s format
                 elapse_str = self.get_time_mm_ss_ms(timer.elapse)
-                window.Element(k1).Update(elapse_str)
+                window.Element(k1).update(elapse_str)
                 timer.elapse += 100
 
                 if button == "_moved_":
@@ -326,11 +328,11 @@ class EasyChessGui:
             self.update_game(move_cnt, move_from + move_to, time_left)
 
             if move_cnt % 2 == 0:
-                window.find_element("_movelist_").Update(f"{(move_cnt + 1) // 2 + 1}. ", append=True)
-            window.find_element("_movelist_").Update(disabled=False)
-            window.find_element("_movelist_").Update(f"{user_move} ", append=True)
+                window.find_element("_movelist_").update(f"{(move_cnt + 1) // 2 + 1}. ", append=True)
+            window.find_element("_movelist_").update(disabled=False)
+            window.find_element("_movelist_").update(f"{user_move} ", append=True)
             if move_cnt % 2 == 1:
-                window.find_element("_movelist_").Update("\n", append=True)
+                window.find_element("_movelist_").update("\n", append=True)
 
             # Change the color of the "fr" and "to" board squares
             self.change_square_color(window, fr_row, fr_col)
@@ -338,11 +340,11 @@ class EasyChessGui:
 
             # Update elapse box
             elapse_str = self.get_time_mm_ss_ms(timer.elapse)
-            window.Element(k1).Update(elapse_str)
+            window.Element(k1).update(elapse_str)
 
             # Update remaining time box
             elapse_str = self.get_time_h_mm_ss(timer.base)
-            window.Element(k2).Update(elapse_str)
+            window.Element(k2).update(elapse_str)
 
             move_cnt += 1
 
@@ -417,13 +419,13 @@ class EasyChessGui:
                 sg.Text("", key="search_info_all_k", size=(55, 1), font=("Segoe UI", 10), relief="sunken",
                         visible=False, )], [sg.Button("Moved", size=(5, 1), key="_moved_", ), ], ]
 
-        white_controls = ([sg.Text("Human", font=("Segoe UI", 12, "bold"), key="_White_", size=(24, 1), ), sg.Push(),
+        white_controls = [[sg.Text("Human", font=("Segoe UI", 12, "bold"), key="_White_", size=(24, 1), ), sg.Push(),
                            sg.Text("", font=("Segoe UI", 12), key="w_base_time_k", size=(11, 1), relief='sunken'),
-                           sg.Text("", font=("Segoe UI", 12), key="w_elapse_k", size=(11, 1), relief='sunken'), ],)
+                           sg.Text("", font=("Segoe UI", 12), key="w_elapse_k", size=(11, 1), relief='sunken'), ]]
 
-        black_controls = ([sg.Text("Computer", font=("Segoe UI", 12, "bold"), key="_Black_", size=(24, 1), ), sg.Push(),
+        black_controls = [[sg.Text("Computer", font=("Segoe UI", 12, "bold"), key="_Black_", size=(24, 1), ), sg.Push(),
                            sg.Text("", font=("Segoe UI", 12), key="b_base_time_k", size=(11, 1), relief='sunken'),
-                           sg.Text("", font=("Segoe UI", 12), key="b_elapse_k", size=(11, 1), relief='sunken'), ],)
+                           sg.Text("", font=("Segoe UI", 12), key="b_elapse_k", size=(11, 1), relief='sunken'), ]]
 
         board_tab = [[sg.Column(board_layout)]]
 
@@ -586,7 +588,7 @@ class EasyChessGui:
 
             # Mode: Neutral
             if button == "Flip":
-                window.find_element("_gamestatus_").Update("Mode     Neutral")
+                window.find_element("_gamestatus_").update("Mode     Neutral")
                 self.clear_elements(window)
                 window = self.create_new_window(window, True)
                 continue
@@ -594,21 +596,28 @@ class EasyChessGui:
             # Mode: Neutral
             if button == "Play":
                 # Change menu from Neutral to Play
-                self.menu_elem.Update(menu_def_play)
-                self.psg_board = copy.deepcopy(initial_board)
-                board = chess.Board()
+                try:
+                    sg.PopupOK("Calibrating camera, please put above an empty chessboard and don't move it "
+                               "afterwards.")
 
-                self.bella.takePicture()
+                    self.bella = MoveDetector()
+                    self.menu_elem.update(menu_def_play)
+                    self.psg_board = copy.deepcopy(initial_board)
+                    board = chess.Board()
 
-                while True:
-                    button, value = window.Read(timeout=100)
+                    self.bella.takePicture()
 
-                    window.find_element("_gamestatus_").Update("Mode     Play")
-                    window.find_element("_movelist_").Update(disabled=False)
-                    window.find_element("_movelist_").Update("", disabled=True)
+                    while True:
+                        button, value = window.Read(timeout=100)
 
-                    self.play_game(window, board)
-                    window.find_element("_gamestatus_").Update("Mode     Neutral")
+                        window.find_element("_gamestatus_").update("Mode     Play")
+                        window.find_element("_movelist_").update(disabled=False)
+                        window.find_element("_movelist_").update("", disabled=True)
+
+                        self.play_game(window, board)
+                        window.find_element("_gamestatus_").update("Mode     Neutral")
+                except Exception:
+                    sg.Popup("Chessboard not found", title=BOX_TITLE)
 
         window.Close()
 

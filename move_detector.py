@@ -24,10 +24,10 @@ class MoveDetector:
         return
 
     def calibrate(self):
-        print("Calibrating camera, please put above an empty chessboard and don't move it afterwards.\n Hold for 5 "
-              "seconds")
-        print("------------------------------------------------------------------------------------------")
-        sleep(5)
+        # print("Calibrating camera, please put above an empty chessboard and don't move it afterwards.\n Hold for 5 "
+        #       "seconds")
+        # print("------------------------------------------------------------------------------------------")
+        # sleep(5)
         # Calibrating
         boxes = {}
         _, frame = self.cap.read()
