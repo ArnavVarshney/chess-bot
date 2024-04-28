@@ -1,4 +1,6 @@
 import json
+import threading
+import webbrowser
 
 import dash
 import pandas as pd
@@ -32,6 +34,9 @@ def init_server(host="0.0.0.0", port=8080):
                                         n_intervals=0), ],
                           style={"width": "80%", "margin": "auto", "font-family": "Comic Sans MS"})
 
+    def open_browser():
+        webbrowser.open(f"http://{host}:{port}")
+
     @app.callback(Output('cp-chart', 'figure'), Output('move-table', 'data'),
                   Input('interval-component', 'n_intervals'))
     def update_layout(n):
@@ -55,6 +60,9 @@ def init_server(host="0.0.0.0", port=8080):
 
         except (json.JSONDecodeError, KeyError):
             return {}, []
+
+    browser_thread = threading.Thread(target=open_browser, daemon=True)
+    browser_thread.start()
 
     app.run_server(host=host, port=port)
 
