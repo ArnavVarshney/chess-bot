@@ -1,3 +1,13 @@
+import copy
+import json
+import queue
+
+import PySimpleGUI as sg
+import chess
+import chess.engine
+import chess.pgn
+from stockfish import Stockfish
+
 from classes import Timer
 from move_detector import MoveDetector
 from util import *
@@ -94,8 +104,7 @@ class EasyChessGui:
 
         evaluation_dictionary.append(
             {"id": id, "move_count": (mc + 1) // 2 + 1, "best_move": best_move, "move": user_move, "wdl": wdl,
-             "time_left": time_left,
-             evalU['type']: evalU['value']})
+             "time_left": time_left, evalU['type']: evalU['value']})
 
     def create_new_window(self, window, flip=False):
         """Hide current window and creates a new window."""
@@ -139,10 +148,6 @@ class EasyChessGui:
         if not symbol:
             return "{:02d}:{:02d}".format(m, s)
         return "{:02d}:{:02d}".format(m, s)
-
-    def get_tag_date(self):
-        """Return date in pgn tag date format"""
-        return datetime.today().strftime("%Y.%m.%d")
 
     def init_game(self):
         """Initialize game with initial pgn tag values"""
@@ -236,8 +241,7 @@ class EasyChessGui:
         """
         Returns Timer object for either human or engine.
         """
-        timer = Timer(self.human_tc_type, self.human_base_time_ms, self.human_inc_time_ms,
-                      self.human_period_moves, )
+        timer = Timer(self.human_tc_type, self.human_base_time_ms, self.human_inc_time_ms, self.human_period_moves, )
 
         elapse_str = self.get_time_h_mm_ss(timer.base)
         window.Element("w_base_time_k").Update(elapse_str)

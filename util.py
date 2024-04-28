@@ -1,18 +1,7 @@
-import copy
-import json
 import logging
 import os
 import platform as sys_plat
-import queue
 import sys
-from datetime import datetime
-
-import PySimpleGUI as sg
-import chess
-import chess.engine
-import chess.pgn
-import chess.polyglot
-from stockfish import Stockfish
 
 log_format = "%(asctime)s :: %(funcName)s :: line: %(lineno)d :: %(levelname)s :: %(message)s"
 logging.basicConfig(filename="pecg_log.txt", filemode="w", level=logging.DEBUG, format=log_format)
@@ -96,8 +85,8 @@ images = {BISHOPB: bishopB, BISHOPW: bishopW, PAWNB: pawnB, PAWNW: pawnW, KNIGHT
 # (1) Mode: Neutral
 menu_def_neutral = [["&Mode", ["Play"]], ["Boar&d", ["Flip", "Color", ["Brown::board_color_k", "Blue::board_color_k",
                                                                        "Green::board_color_k", "Gray::board_color_k", ],
-                                                     "Theme", GUI_THEME, ], ],
-                    ["&Time", ["User::tc_k"]], ["&User", ["Set Name::user_name_k"]]]
+                                                     "Theme", GUI_THEME, ], ], ["&Time", ["User::tc_k"]],
+                    ["&User", ["Set Name::user_name_k"]]]
 
 # (2) Mode: Play, info: hide
 menu_def_play = [["&Mode", ["Neutral"]]]
