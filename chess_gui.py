@@ -1,6 +1,7 @@
 import copy
 import json
 import queue
+import threading
 
 import PySimpleGUI as sg
 import chess
@@ -10,6 +11,7 @@ from stockfish import Stockfish
 
 from classes import Timer
 from move_detector import MoveDetector
+from server import init_server
 from util import *
 
 
@@ -21,6 +23,8 @@ class EasyChessGui:
         self.theme = theme
 
         self.init_game()
+        server_thread = threading.Thread(target=init_server, daemon=True)
+        server_thread.start()
 
         self.psg_board = None
         self.menu_elem = None
