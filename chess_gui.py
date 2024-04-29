@@ -635,8 +635,10 @@ class EasyChessGui:
 
                         self.play_game(window, board)
                         window.find_element("_gamestatus_").update("Mode     Neutral")
+                except ValueError:
+                    sg.Popup("Invalid move.", title=BOX_TITLE)
                 except Exception:
-                    sg.Popup("Chessboard not found", title=BOX_TITLE)
+                    sg.Popup("Chessboard not found.", title=BOX_TITLE)
 
         window.Close()
 
