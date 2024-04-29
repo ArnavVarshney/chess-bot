@@ -103,11 +103,11 @@ class EasyChessGui:
           time_left: time left
         """
         # Save user comment
-        self.stockfish.make_moves_from_current_position([''.join(user_move)])
         evalU = self.stockfish.get_evaluation()
         wdl = self.stockfish.get_wdl_stats()
         best_move = self.stockfish.get_best_move()
-        id = "black" if mc % 2 == 0 else "white"
+        self.stockfish.make_moves_from_current_position([''.join(user_move)])
+        id = "black" if (mc + 1) % 2 == 0 else "white"
 
         evaluation_dictionary.append(
             {"id": id, "move_count": (mc + 1) // 2 + 1, "best_move": best_move, "move": user_move, "wdl": wdl,
@@ -309,7 +309,6 @@ class EasyChessGui:
                     user_move = self.bella.detectPiece()
                     move_from, move_to = self.get_move_from_to(user_move, move_cnt)
                     print(f"move_from: {move_from}, move_to: {move_to}")
-                    save_to_json_file("evaluation.json", evaluation_dictionary)
                     if move_from is not None and move_to is not None and move_from != move_to:
                         break
 
@@ -336,6 +335,13 @@ class EasyChessGui:
             # Update game, move from human
             time_left = timer.base
             self.update_game(move_cnt, move_from + move_to, time_left)
+            save_to_json_file("evaluation.json", evaluation_dictionary)
+            last_move = evaluation_dictionary[-1]
+            if 'mate' in last_move:
+                if last_move['mate'] == -1:
+                    sg.Popup("Game is over. Checkmate.", title=BOX_TITLE)
+                    user_quit = True
+                    break
 
             if move_cnt % 2 == 0:
                 window.find_element("_movelist_").update(f"{(move_cnt + 1) // 2 + 1}. ", append=True)

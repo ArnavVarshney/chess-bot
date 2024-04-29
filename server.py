@@ -23,7 +23,7 @@ def init_server(host="0.0.0.0", port=8080):
                                                                                    {"name": "Your Move", "id": "move"},
                                                                                    {"name": "Best Move",
                                                                                     "id": "best_move"},
-                                                                                   {"name": "Time Left (s)",
+                                                                                   {"name": "Time Left (ms)",
                                                                                     "id": "time_left"},
                                                                                    {"name": "Centipawn", "id": "cp"}, ],
                                                                           style_cell={"textAlign": "center"},
