@@ -40,6 +40,7 @@ class MoveDetector:
         plt.figure(figsize=(10, 10))
         plt.subplot(122)
         plt.imshow(res)
+        plt.savefig(self.directory + '/out.jpg', dpi=1000)
 
         res = np.uint8(res)
         ret, corners = cv.findChessboardCorners(res, (7, 7),
