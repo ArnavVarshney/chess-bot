@@ -18,6 +18,8 @@ class MoveDetector:
         self.cap = cv.VideoCapture(cam)
         self.cap.set(3, 1920)
         self.cap.set(4, 1080)
+        self.cap.set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
+        self.cap.set(cv.CAP_PROP_EXPOSURE, 2)
         if not os.path.isdir(self.directory):
             os.makedirs(self.directory)
         self.boxes = self.calibrate()
@@ -31,6 +33,9 @@ class MoveDetector:
         # Calibrating
         boxes = {}
         _, frame = self.cap.read()
+        plt.figure(figsize=(10, 10))
+        plt.imshow(frame)
+        plt.savefig(self.directory + '/raw.jpg', dpi=1000)
         # img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         img = cv.medianBlur(frame, 5)
         ret, th1 = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
