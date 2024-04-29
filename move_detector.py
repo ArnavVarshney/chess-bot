@@ -1,3 +1,4 @@
+import json
 import os
 from time import sleep
 
@@ -32,7 +33,15 @@ class MoveDetector:
         # sleep(5)
         # Calibrating
         boxes = {}
-        _, frame = self.cap.read()
+
+        if os.path.isfile(self.directory + '/boxes.json'):
+            print("Calibration dictionary found, skipping reading.")
+            with open(self.directory + '/boxes.json', 'r') as f:
+                boxes = json.load(f)
+                return boxes
+        else:
+            _, frame = self.cap.read()
+
         plt.figure(figsize=(10, 10))
         plt.imshow(frame)
         plt.savefig(self.directory + '/raw.jpg', dpi=1000)
@@ -171,6 +180,10 @@ class MoveDetector:
         plt.close()
 
         print("Done :). Images stored in:\n" + self.directory + "/out.jpg")
+
+        with open(self.directory + '/boxes.json', 'w') as f:
+            f.write(json.dumps(boxes))
+
         return boxes
 
     def takePicture(self):
