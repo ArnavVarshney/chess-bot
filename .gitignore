@@ -23,7 +23,6 @@ Engines/*
 venv
 .idea
 __pycache__
-output/*
 
 # Project
 pecg_user.json
