@@ -89,4 +89,4 @@ menu_def_neutral = [["&Mode", ["Play"]], ["Boar&d", ["Flip", "Color", ["Brown::b
                     ["&User", ["Set Name::user_name_k"]], ['&Camera', ['Open Camera']]]
 
 # (2) Mode: Play, info: hide
-menu_def_play = [["&Mode", ["Neutral"]]]
+menu_def_play = []

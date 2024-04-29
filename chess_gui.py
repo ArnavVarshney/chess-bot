@@ -271,6 +271,7 @@ class EasyChessGui:
         # Init timer
         p1_timer = self.define_timer(window)
         p2_timer = self.define_timer(window)
+        user_quit = False
 
         # Game loop
         while not board.is_game_over(claim_draw=True):
@@ -293,6 +294,11 @@ class EasyChessGui:
             while True:
                 button, value = window.Read(timeout=100)
 
+                if button is None:
+                    user_quit = True
+                    logging.info("Quit app from main loop, X is pressed.")
+                    break
+
                 # Update elapse box in m:s format
                 elapse_str = self.get_time_mm_ss_ms(timer.elapse)
                 window.Element(k1).update(elapse_str)
@@ -306,6 +312,9 @@ class EasyChessGui:
                     save_to_json_file("evaluation.json", evaluation_dictionary)
                     if move_from is not None and move_to is not None and move_from != move_to:
                         break
+
+            if user_quit:
+                break
 
             fr_col = "abcdefgh".index(move_from[0])
             fr_row = 8 - int(move_from[1])
@@ -352,7 +361,9 @@ class EasyChessGui:
         if board.is_game_over(claim_draw=True):
             sg.Popup("Game is over.", title=BOX_TITLE)
 
-        self.clear_elements(window)
+        if not user_quit:
+            self.clear_elements(window)
+        return user_quit
 
     def create_board(self, is_p1_white=True):
         """
@@ -633,7 +644,9 @@ class EasyChessGui:
                         window.find_element("_movelist_").update("", disabled=True)
                         window.find_element("_moved_").update(visible=True)
 
-                        self.play_game(window, board)
+                        quit = self.play_game(window, board)
+                        if quit:
+                            break
                         window.find_element("_gamestatus_").update("Mode     Neutral")
                 except ValueError:
                     sg.Popup("Invalid move.", title=BOX_TITLE)
