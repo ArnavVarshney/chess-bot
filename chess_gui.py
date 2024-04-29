@@ -616,6 +616,9 @@ class EasyChessGui:
                                "afterwards.", title=BOX_TITLE)
 
                     self.bella = MoveDetector()
+
+                    sg.PopupOK("Camera calibrated. Please setup the board.", title=BOX_TITLE)
+
                     self.menu_elem.update(menu_def_play)
                     self.psg_board = copy.deepcopy(initial_board)
                     board = chess.Board()
