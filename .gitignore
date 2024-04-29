@@ -27,3 +27,4 @@ __pycache__
 # Project
 pecg_user.json
 pecg_engines.json
+/output/move_detector/.ipynb_checkpoints/
