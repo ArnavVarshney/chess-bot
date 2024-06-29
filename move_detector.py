@@ -1,9 +1,9 @@
 import os
 from time import sleep
-
 import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
+from util import BinaryConverter
 
 
 class MoveDetector:
@@ -15,36 +15,28 @@ class MoveDetector:
     translation = {"A": "H", "H": "A", "B": "G", "G": "B", "C": "F", "F": "C", "D": "E", "E": "D"}
 
     def __init__(self, cam=0):
-        self.cap = cv.VideoCapture(cam)
-        self.cap.set(3, 1920)
-        self.cap.set(4, 1080)
+        # self.cap = cv.VideoCapture(cam)
+        # self.cap.set(3, 1920)
+        # self.cap.set(4, 1080)
         if not os.path.isdir(self.directory):
             os.makedirs(self.directory)
         self.boxes = self.calibrate()
         return
 
     def calibrate(self):
-        # print("Calibrating camera, please put above an empty chessboard and don't move it afterwards.\n Hold for 5 "
-        #       "seconds")
-        # print("------------------------------------------------------------------------------------------")
-        # sleep(5)
-        # Calibrating
         boxes = {}
-        _, frame = self.cap.read()
-        # img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        img = cv.medianBlur(frame, 5)
-        ret, th1 = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
-        krn = cv.getStructuringElement(cv.MORPH_RECT, (50, 30))
-        dlt = cv.dilate(th1, krn, iterations=5)
-        res = 255 - cv.bitwise_and(dlt, th1)
-        plt.figure(figsize=(10, 10))
-        plt.subplot(122)
-        plt.imshow(res)
-        plt.savefig(self.directory + '/out.jpg', dpi=1000)
 
-        res = np.uint8(res)
-        ret, corners = cv.findChessboardCorners(res, (7, 7),
+        # _, frame = self.cap.read()
+        frame = cv.imread("empty_test.jpg")
+        cv.imwrite(self.directory+"/cap.jpg", frame)
+
+        binary_cvt = BinaryConverter()
+        img = binary_cvt.convert(self.directory+"/cap.jpg")
+
+        ret, corners = cv.findChessboardCorners(img*255, (7, 7),
                                                 flags=cv.CALIB_CB_ADAPTIVE_THRESH + cv.CALIB_CB_FAST_CHECK + cv.CALIB_CB_NORMALIZE_IMAGE)
+        
+        #Visualizing dotted corners
         temp = frame.copy()
         if ret:
             for corner in corners:
@@ -52,45 +44,39 @@ class MoveDetector:
                 cv.circle(temp, center=coord, radius=5, color=(255, 0, 0), thickness=5)
         else:
             raise Exception("No chessboard found")
+        
+        plt.imsave(self.directory+"/dotted.jpg", temp)
 
         # Sorting
-        corners_copy = corners.copy()
         sorted_points = []
-
-        max = -1
+        #Find point furthest from origin
+        top = -1
         pos = -1
         for index, point in enumerate(corners):
-            x, y = point[0]
-            if (x ** 2 + y ** 2 > max):
-                max = x ** 2 + y ** 2
+            x,y = point[0]
+            if(x**2+y**2>top):
+                top = x**2+y**2
                 pos = index
-        poi = corners[pos]
-        # Find all pois
-        pois = []
-        corners_copy = np.ndarray.tolist(corners).copy()
-        for index, point in enumerate(corners_copy):
-            corners_copy[index] = (index, point[0][0], abs(point[0][1] - poi[0][1]))
-        corners_copy.sort(key=lambda a: (a[2], a[1]))
+        furthest = corners[pos]
 
-        for i in range(7):
-            pois.append(np.ndarray.tolist(corners[corners_copy[i][0]][0]))
-        pois.sort(reverse=True)
+        corners = corners.squeeze()
+        #Update coordinate system
+        corners = furthest - corners 
 
-        for poi in pois:
-            col = []
-            corners_copy = np.ndarray.tolist(corners).copy()
-            for index, point in enumerate(corners_copy):
-                corners_copy[index] = (index, abs(point[0][0] - poi[0]), point[0][1])
-            corners_copy.sort(key=lambda a: (a[1], a[2]))
+        #Sort by x
+        temp = np.array(sorted(corners, key=lambda tup: tup[0]))
 
-            for i in range(0, 7):
-                col.append(np.ndarray.tolist(corners[corners_copy[i][0]][0]))
-            col.sort(key=lambda a: (a[1], a[0]), reverse=True)
+        for col in range(7):
+            s = temp[col*7:col*7+7]
+            sorted_points.extend(sorted(s, key=lambda tup: tup[1]))
+        sorted_points = np.array(sorted_points)
 
-            sorted_points.extend(col)
+        #Revert coordinate system
+        sorted_points = furthest - sorted_points
 
         # Extrapolating
         # columns
+        sorted_points = list(sorted_points)
         sorted_points_copy = []
         for col in range(7):
             column = sorted_points[col * 7:(col + 1) * 7]
@@ -101,11 +87,11 @@ class MoveDetector:
             p3 = column[-1]
             p4 = column[-2]
 
-            distances = (abs(p1[0] - p2[0]), abs(p1[1] - p2[1]))
-            new_p1 = [p1[0] - distances[0], p1[1] + distances[1]]
+            distances = (p1[0] - p2[0], abs(p1[1] - p2[1]))
+            new_p1 = [p1[0] + distances[0], p1[1] + distances[1]]
             column.insert(0, new_p1)
 
-            distances = (abs(p3[0] - p4[0]), abs(p3[1] - p4[1]))
+            distances = (p3[0] - p4[0], abs(p3[1] - p4[1]))
             new_p1 = [p3[0] + distances[0], p3[1] - distances[1]]
             column.append(new_p1)
 
@@ -131,13 +117,13 @@ class MoveDetector:
             p3 = column3[i]
             p4 = column4[i]
 
-            distances = (abs(p1[0] - p2[0]), abs(p1[1] - p2[1]))
+            distances = (abs(p1[0] - p2[0]), p1[1] - p2[1])
             new_p1 = [p1[0] + distances[0], p1[1] + distances[1]]
 
             newPoints.append(new_p1)
             column_first.append(new_p1)
 
-            distances = (abs(p3[0] - p4[0]), abs(p3[1] - p4[1]))
+            distances = (abs(p3[0] - p4[0]), p4[1] - p3[1])
             new_p1 = [p4[0] - distances[0], p4[1] + distances[1]]
 
             newPoints.append(new_p1)
@@ -148,12 +134,12 @@ class MoveDetector:
 
         sorted_points = column_first.copy()
 
+        # Visualizing
         temp = frame.copy()
         for corner in sorted_points:
             coord = (int(corner[0]), int(corner[1]))
             cv.circle(temp, center=coord, radius=5, color=(255, 0, 255), thickness=5)
-        plt.subplot(121)
-        plt.imshow(temp)
+        plt.imsave(self.directory+"/dotted2.jpg", temp)
 
         c = ord('A') - 1
         for col in range(8):
@@ -162,10 +148,7 @@ class MoveDetector:
                 boxes[chr(c) + str(row + 1)] = (sorted_points[col * 9 + 1 + 9 + row], sorted_points[col * 9 + 1 + row],
                                                 sorted_points[col * 9 + 9 + row], sorted_points[col * 9 + row])
 
-        plt.savefig(self.directory + '/out.jpg', dpi=1000)
-        plt.close()
-
-        print("Done :). Images stored in:\n" + self.directory + "/out.jpg")
+        print("Done :)")
         return boxes
 
     def takePicture(self):
@@ -205,15 +188,15 @@ class MoveDetector:
 
 def main():
     detector = MoveDetector()
-    print("sleeping")
-    sleep(15)
-    detector.takePicture()
-    print("done")
-    print("sleeping")
-    sleep(10)
-    print("done")
-    detector.takePicture()
-    print(detector.detectPiece())
+    # print("sleeping")
+    # sleep(15)
+    # detector.takePicture()
+    # print("done")
+    # print("sleeping")
+    # sleep(10)
+    # print("done")
+    # detector.takePicture()
+    # print(detector.detectPiece())
     return
 
 
