@@ -1,6 +1,7 @@
 import cv2 as cv
 import scipy.signal
 import numpy as np
+import imutils
 
 class BinaryConverter():
     def topkindex(self, arr, k):
@@ -77,3 +78,15 @@ def splitAndSwap(imgs):
         imgs[i] = temp
     
     return np.array(imgs)
+
+def crop(img, points):
+    top_left, top_right, bottom_right, bottom_left = points
+    y_lowerbound = int(min(top_left[1], top_right[1]))
+    y_upperbound = int(max(bottom_left[1], bottom_right[1]))
+
+    x_upperbound = int(max(top_right[0], bottom_right[0]))
+    x_lowerbound = int(min(bottom_left[0], top_left[0]))
+
+    s = max(y_upperbound - y_lowerbound, x_upperbound - x_lowerbound)
+
+    return img[y_lowerbound:y_lowerbound+s, x_lowerbound:x_lowerbound+s]

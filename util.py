@@ -109,8 +109,6 @@ class BinaryConverter():
 
         #Get buckets
         bucket = [0 for _ in range(255+1)]
-        # for i in range(255+1):
-        #     bucket.append(0)
 
         row, col = img.shape
         for i in range(row):

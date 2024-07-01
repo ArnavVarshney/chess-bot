@@ -12,19 +12,35 @@ class Board:
     cap = None
     boxes = {}
     directory = "output/board"
+    cropped_directory = "output/cropped"
     k = 7
+    classifier = None
     # translation = {"A": "H", "H": "A", "B": "G", "G": "B", "C": "F", "F": "C", "D": "E", "E": "D"}
 
-    def __init__(self, cam=0):
+    def __init__(self, cam=0, bypass=None):
         print("---\n")
         # self.cap = cv.VideoCapture(cam)
         # self.cap.set(3, 1920)
         # self.cap.set(4, 1080)
         if not os.path.isdir(self.directory):
             os.makedirs(self.directory)
-        self.boxes = self.calibrate()
+        if not os.path.isdir(self.cropped_directory):
+            os.makedirs(self.cropped_directory)
+        self.boxes = self.calibrate(bypass)
+        self.classifier = PieceClassifier()
         print("\n---")
         return
+    
+    def getPiecesPosition(self, image):
+        pos={}
+        for box in self.boxes:
+            img = crop(image, self.boxes[box])
+
+            #Visualization
+            plt.imsave(self.cropped_directory+"/"+box+".jpg", cv.cvtColor(img,cv.COLOR_BGR2RGB))
+
+            pos[box] = self.classifier.getLabelNames(self.classifier.predict([img]))
+        return pos
     
     def sortChessBoardCorners(self, corners):
         k = self.k
@@ -136,8 +152,9 @@ class Board:
     
     def getChessboardCorners(self,):
         binary_cvt = BinaryConverter()
-        img = binary_cvt.convert(self.directory+"/cap.jpg")
-        ret, corners = cv.findChessboardCorners(img*255, (7, 7),
+        img = binary_cvt.convert(self.directory+"/cap.jpg") * 255
+        plt.imsave(self.directory+"/bin.jpg", img)
+        ret, corners = cv.findChessboardCorners(img, (7, 7),
                                                 flags=cv.CALIB_CB_ADAPTIVE_THRESH + cv.CALIB_CB_FAST_CHECK + cv.CALIB_CB_NORMALIZE_IMAGE)
         
         #Visualizing dotted corners
@@ -149,6 +166,7 @@ class Board:
                 cv.circle(temp, center=coord, radius=5, color=(255, 0, 0), thickness=5)
         else:
             raise Exception("No chessboard found")
+        
         plt.imsave(self.directory+"/dotted.jpg", temp)
         print("corners found")
         return corners
@@ -160,15 +178,18 @@ class Board:
             c += 1
             for row in range(8):
                 boxes[chr(c) + str(row + 1)] = (points[col * 9 + 1 + 9 + row], points[col * 9 + 1 + row],
-                                                points[col * 9 + 9 + row], points[col * 9 + row])
+                                                points[col * 9 + 9 + row], points[col * 9 + row]) # Top left -> Top right -> Bottom right -> Bottom left
         return boxes
 
-    def calibrate(self):
+    def calibrate(self, bypass=None):
         print("Calibration starting...")
         boxes = {}
 
-        # _, frame = self.cap.read()
-        frame = cv.imread("dummy_input/empty_test.jpg")
+        frame = None
+        if(bypass==None):
+            _, frame = self.cap.read()
+        else:
+            frame = cv.imread(bypass)
         cv.imwrite(self.directory+"/cap.jpg", frame)
 
         #Corners points processing
@@ -182,7 +203,12 @@ class Board:
         return boxes
 
 def main():
-    board = Board()
+    board = Board(bypass="dummy_input/empty1.jpg")
+
+    img = cv.imread("dummy_input/filled1.jpg")
+    pred = board.getPiecesPosition(img)
+    print(pred)
+
     return
 
 if __name__ == "__main__":

@@ -34,9 +34,12 @@ class PieceClassifier:
         print("\n---")
         return
     
-    #Takes in BGR image
+    #Takes in BGR images
     def predict(self, imgs):
-        preds = self.model(torch.from_numpy(splitAndSwap(resize(imgs, self.img_size))).to(self.device).to(torch.float))
+        x = resize(imgs, self.img_size)
+        x = splitAndSwap(x)
+        x = torch.from_numpy(x).to(self.device).to(torch.float)
+        preds = self.model(x)
         return torch.argmax(preds.data,1)
     
     def getLabelNames(self, preds):
