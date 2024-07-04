@@ -10,7 +10,6 @@ from classifier import *
 #k x k board
 class Board:
     cap = None
-    
     k = 7
 
     moves = [("A1", "C2"), ("E4", "H8")]
@@ -33,6 +32,9 @@ class Board:
         self.boxes = self.calibrate(bypass)
         self.classifier = PieceClassifier()
         self.pos = None
+        self.old_pos = None
+        self.move_played = None
+
         print("\n---")
         return
     
@@ -218,7 +220,7 @@ class Board:
     def valid(self, pos):
         for box in pos:
             if self.pos[box]!=pos[box]:
-                print("cpu"+str(self.id)+": Discrepany detected at",box,". Actual:",pos[box],", predicted:", self.pos[box])
+                print("cpu"+str(self.id)+": Discrepany detected at",box,". Predicted:",pos[box],", Actual:", self.pos[box])
                 return False
         return True
     
@@ -227,16 +229,24 @@ class Board:
             return None
         return self.moves.pop(0)
     
-    def make_move(self):
+    def make_move(self, bypass=None):
         move = self.get_move()
+
+        if(bypass!=None):
+            move = bypass
+        
         if(move == None):
             return False
         
-        #Temporary
+        self.old_pos = copy.deepcopy(self.pos)
+    
+        #Temporary until I know how stockfish works
         pos1, pos2 = move
         temp = self.pos[pos1]
         self.pos[pos1] = self.pos[pos2]
         self.pos[pos2] = temp
+
+        self.move_played = move
 
         #Logging
         print("cpu"+str(self.id)+" made a move:", move)
