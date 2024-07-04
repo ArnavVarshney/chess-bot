@@ -1,6 +1,7 @@
 import model.cnn as cnn
 import torch
 from util import *
+from matplotlib import pyplot as plt
 
 class PieceClassifier:
     model=None
@@ -21,6 +22,7 @@ class PieceClassifier:
         11:"white_queen",
         12:"white_rook",
     }
+    pos = None
 
     def __init__(self, weights_path="model/model.pt", img_size=70):
         print("---\n")

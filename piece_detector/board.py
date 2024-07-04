@@ -10,14 +10,14 @@ from classifier import *
 #k x k board
 class Board:
     cap = None
-    boxes = {}
     directory = "output/board"
     cropped_directory = "output/cropped"
     k = 7
-    classifier = None
+
+    moves = [("A1", "C2"), ("E4", "H8")]
     # translation = {"A": "H", "H": "A", "B": "G", "G": "B", "C": "F", "F": "C", "D": "E", "E": "D"}
 
-    def __init__(self, cam=0, bypass=None):
+    def __init__(self, id = -1,cam=0, bypass=None):
         print("---\n")
         # self.cap = cv.VideoCapture(cam)
         # self.cap.set(3, 1920)
@@ -26,12 +26,18 @@ class Board:
             os.makedirs(self.directory)
         if not os.path.isdir(self.cropped_directory):
             os.makedirs(self.cropped_directory)
+
         self.boxes = self.calibrate(bypass)
         self.classifier = PieceClassifier()
+        self.pos = None
+        self.id = id
         print("\n---")
         return
     
     def getPiecesPosition(self, image):
+        #Logging
+        print("cpu"+str(self.id)+" scanning the board...")
+
         pos={}
         for box in self.boxes:
             img = crop(image, self.boxes[box])
@@ -40,6 +46,7 @@ class Board:
             plt.imsave(self.cropped_directory+"/"+box+".jpg", cv.cvtColor(img,cv.COLOR_BGR2RGB))
 
             pos[box] = self.classifier.getLabelNames(self.classifier.predict([img]))
+        self.pos = copy.deepcopy(pos)
         return pos
     
     def sortChessBoardCorners(self, corners):
@@ -202,6 +209,38 @@ class Board:
         print("Done. You can check the results at: "+self.directory)
         return boxes
 
+    def setPos(self, pos):
+        self.pos = copy.deepcopy(pos)
+        return pos
+    
+    def valid(self, pos):
+        for box in pos:
+            if self.pos[box]!=pos[box]:
+                print("cpu"+str(self.id)+": Discrepany detected at",box,". Actual:",pos[box],", predicted:", self.pos[box])
+                return False
+        return True
+    
+    def get_move(self):
+        if (len(self.moves)==0):
+            return None
+        return self.moves.pop(0)
+    
+    def make_move(self):
+        move = self.get_move()
+        if(move == None):
+            return False
+        
+        #Temporary
+        pos1, pos2 = move
+        temp = self.pos[pos1]
+        self.pos[pos1] = self.pos[pos2]
+        self.pos[pos2] = temp
+
+        #Logging
+        print("cpu"+str(self.id)+" made a move:", move)
+
+        return True
+    
 def main():
     board = Board(bypass="dummy_input/empty1.jpg")
 
