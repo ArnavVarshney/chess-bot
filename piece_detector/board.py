@@ -10,18 +10,21 @@ from classifier import *
 #k x k board
 class Board:
     cap = None
-    directory = "output/board"
-    cropped_directory = "output/cropped"
+    
     k = 7
 
     moves = [("A1", "C2"), ("E4", "H8")]
     # translation = {"A": "H", "H": "A", "B": "G", "G": "B", "C": "F", "F": "C", "D": "E", "E": "D"}
 
-    def __init__(self, id = -1,cam=0, bypass=None):
+    def __init__(self, id = 0,cam=0, bypass=None):
         print("---\n")
         # self.cap = cv.VideoCapture(cam)
         # self.cap.set(3, 1920)
         # self.cap.set(4, 1080)
+        self.id = id
+        self.directory = "output/cpu"+str(self.id)+"/board"
+        self.cropped_directory = "output/cpu"+str(self.id)+"/cropped"
+
         if not os.path.isdir(self.directory):
             os.makedirs(self.directory)
         if not os.path.isdir(self.cropped_directory):
@@ -30,7 +33,6 @@ class Board:
         self.boxes = self.calibrate(bypass)
         self.classifier = PieceClassifier()
         self.pos = None
-        self.id = id
         print("\n---")
         return
     
